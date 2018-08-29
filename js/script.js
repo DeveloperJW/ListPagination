@@ -31,9 +31,9 @@ let contentHTML =`<ul>`;
 let pageInsertHTML= () =>{
     for (let i=0; i<getNumOfPages(); i++){
         if (i+1 === currentPage){
-            contentHTML+=`<li><a class="active" href="#"> ${i+1}</a></li>`;
+            contentHTML+=`<li><a href="#">${i+1}</a></li>`;
         } else{
-            contentHTML+=`<li><a href="#"> ${i+1}</a></li>`;
+            contentHTML+=`<li><a href="#">${i+1}</a></li>`;
         }
     }
     contentHTML+=`</ul>`;
@@ -76,11 +76,66 @@ let hideNextPages = (currentPage) =>{
     }
 
 };
+
+/**
+ *
+ */
+let showCurrentPage = (currentPage) =>{
+    for (let i=(currentPage-1)*recordsPerPage; i<currentPage*recordsPerPage;i++){
+        if (i>totalNumOfRecord){
+
+        } else{
+            allRecords[i].style.display='block';
+        }
+    }
+
+};
+
+let resetRecords=() =>{
+    for (let i=0;i<totalNumOfRecord;i++){
+        allRecords[i].style.display = 'block';
+    }
+};
+
+let hideAllRecords=() =>{
+    for (let i=0;i<totalNumOfRecord;i++){
+        allRecords[i].style.display = 'none';
+    }
+};
+
+/**
+ * make class active
+ */
+let assginActive =(activeNo)=>{
+    let activePage = document.querySelectorAll('.pagination ul li a');
+    for (let i=0; i<activePage.length; i++){
+        if (i+1 ===activeNo){
+            activePage[i].className ='active';
+        } else{
+            activePage[i].className= 'none';
+        }
+    }
+
+};
 // call the functions to hide records based on the current page number
-hidePreviousPages(currentPage);
-hideNextPages(currentPage);
+// hidePreviousPages(currentPage);
+// hideNextPages(currentPage);
+hideAllRecords();
+showCurrentPage(currentPage);
+assginActive(currentPage);
 
-
+/**
+ * printRecords function
+ */
+let printRecords =(pageNum)=>{
+  // hideAllRecords();
+  // showCurrentPage(pageNum);
+  // currentPage = pageNum;
+    resetRecords();
+    hidePreviousPages(pageNum);
+    hideNextPages(pageNum);
+    currentPage=pageNum;
+};
 
 // Create and append the pagination links - Creating a function that can do this is a good approach
 
@@ -88,10 +143,13 @@ hideNextPages(currentPage);
 
 // Add functionality to the pagination buttons so that they show and hide the correct items
 // Tip: If you created a function above to show/hide list items, it could be helpful here
-let selected = document.querySelector('.pagination');
+let selected = document.querySelector('.pagination ul');
 selected.addEventListener('click', (event) => {
-    if (event.target.tagName == 'LI') {
-        currentPage=parseInt(event.target.contentText);
-    }
+    // console.log(event.target);
+    let pageNo=parseInt(event.target.textContent);
+    // console.log(pageNo);
+    // event.preventDefault();
+    printRecords(pageNo);
+    assginActive(pageNo);
 });
 
