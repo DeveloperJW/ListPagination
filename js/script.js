@@ -207,6 +207,9 @@ searchButton.addEventListener('click',(event)=>{
     }//end of else statement
     //assign active className to the pagination of research result page
     assignActive(currentPage);
+    // filter and only show first 10 records in search results
+    hidePreviousPages(currentPage,filterCollection);
+    hideNextPages(currentPage,filterCollection);
     //reset match count
     matchCount=0;
     searchInput.value='';
