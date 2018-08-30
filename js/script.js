@@ -10,10 +10,13 @@ let allRecords =  document.querySelectorAll('.student-item.cf'); //select all st
 let totalNumOfRecord = allRecords.length;
 let page = document.querySelector('.page');
 let studentList=document.querySelector('.student-list');
+let filterCollection = allRecords;
+
+let errorMessage=document.createElement('h3');
 
 
-// Create a function to hide all of the items in the list excpet for the ten you want to show
-// Tip: Keep in mind that with a list of 54 studetns, the last page will only display four
+// Create a function to hide all of the items in the list except for the ten you want to show
+// Tip: Keep in mind that with a list of 54 students, the last page will only display four
 /**
  * First, I am going to hide all records from the page. And call the function to show the required records.
  */
@@ -48,10 +51,10 @@ page.appendChild(pagination);
  * Function hidePreviousPages will check if the current page is 1, if the current page is 1. The function do nothing.
  * Else, the function will hide all student records which should displayed on previous pages
  */
-let hidePreviousPages = (currentPage) =>{
+let hidePreviousPages = (currentPage, collection) =>{
     if (currentPage !== 1){
         for (let i=0; i<(currentPage-1)*recordsPerPage; i++){
-            allRecords[i].style.display='none';
+            collection[i].style.display='none';
         }
     }
 };
@@ -60,31 +63,14 @@ let hidePreviousPages = (currentPage) =>{
  * Function hideNextPages will check if the current page is the last page, if the current page is the last page.
  * The function do nothing. Else, the function will hide all student records which should displayed on next pages
  */
-let hideNextPages = (currentPage) =>{
-    if (currentPage !== getNumOfPages()){
-        for (let i=currentPage*recordsPerPage; i<totalNumOfRecord; i++){
-            allRecords[i].style.display='none';
-        }
+let hideNextPages = (currentPage, collection) =>{
+    for (let i=currentPage*recordsPerPage; i<collection.length; i++){
+        collection[i].style.display='none';
     }
-
 };
 
-/**
- *
- */
-// let showCurrentPage = (currentPage) =>{
-//     for (let i=(currentPage-1)*recordsPerPage; i<currentPage*recordsPerPage;i++){
-//         if (i>totalNumOfRecord){
-//
-//         } else{
-//             allRecords[i].style.display='block';
-//         }
-//     }
-//
-// };
-
-let resetRecords=() =>{
-    for (let i=0;i<totalNumOfRecord;i++){
+let resetRecords=(collection) =>{
+    for (let i=0;i<collection.length;i++){
         allRecords[i].style.display = 'block';
     }
 };
@@ -101,7 +87,7 @@ let hideAllRecords=() =>{
 let assignActive =(activeNo)=>{
     let activePage = document.querySelectorAll('.pagination ul li a');
     for (let i=0; i<activePage.length; i++){
-        if (i+1 ===activeNo){
+        if ((i+1) === activeNo){
             activePage[i].className ='active';
         } else{
             activePage[i].className= 'none';
@@ -110,21 +96,20 @@ let assignActive =(activeNo)=>{
 
 };
 // call the functions to hide records based on the current page number
-hidePreviousPages(currentPage);
-hideNextPages(currentPage);
+hidePreviousPages(currentPage,allRecords);
+hideNextPages(currentPage,allRecords);
 assignActive(currentPage);
 
 /**
  * printRecords function
  */
-let printRecords =(pageNum)=>{
+let printRecords =()=>{
   // hideAllRecords();
   // showCurrentPage(pageNum);
   // currentPage = pageNum;
-    resetRecords();
-    hidePreviousPages(pageNum);
-    hideNextPages(pageNum);
-    currentPage=pageNum;
+    resetRecords(filterCollection);
+    hidePreviousPages(currentPage,filterCollection);
+    hideNextPages(currentPage,filterCollection);
 };
 
 // Create and append the pagination links - Creating a function that can do this is a good approach
@@ -135,12 +120,17 @@ let printRecords =(pageNum)=>{
 // Tip: If you created a function above to show/hide list items, it could be helpful here
 let selected = document.querySelector('.pagination ul');
 selected.addEventListener('click', (event) => {
-    // console.log(event.target);
-    let pageNo=parseInt(event.target.textContent);
-    // console.log(pageNo);
-    // event.preventDefault();
-    printRecords(pageNo);
-    assignActive(pageNo);
+    if (event.target.tagName ==='A'){
+        let pageNo=parseInt(event.target.textContent);
+        // printRecords(pageNo,filterCollection);
+        assignActive(pageNo);
+        console.log(filterCollection.length);
+        console.log(currentPage);
+        currentPage=pageNo;
+        printRecords();
+        console.log(currentPage);
+    }
+    event.stopPropagation();
 });
 
 // The following code are for the purpose of extra credits
@@ -187,20 +177,13 @@ let searchName = (name) =>{
             allRecords[i].style.display='block';
             matchCount++;//extra credit part 3
         }
-    }
+    }//end of for loop
+    filterCollection = studentList.querySelectorAll("li[style='display: block;']");
 };
 // create a function select all elements with .display='block';
 // and then use hidePrevious, hideNext to make the new pagination works.
 
-// let searchResultPageNumber = ()=>{
-//     if (matchCount === 0){
-//         return 1;
-//     } else{
-//         return Math.ceil(matchCount/recordsPerPage);
-//     }
-// };
-
-searchButton.addEventListener('click',()=>{
+searchButton.addEventListener('click',(event)=>{
     // first, all records need to be hide
     hideAllRecords();
     // next, need to loop through
@@ -208,30 +191,25 @@ searchButton.addEventListener('click',()=>{
     console.log('You just clicked the searchButton');
     console.log(searchInput.value.toLowerCase());
     searchName(searchInput.value.toLowerCase());
-    //update new pagination based on search results
-    // pagination.innerHTML=pageInsertHTML(searchResultPageNumber());
-    let errorMessage=document.createElement('h3');
+    console.log("The page number is "+filterCollection.length);
+
     if (matchCount === 0){
-        pagination.innerHTML=pageInsertHTML(1);
         errorMessage.className= 'error-message';
         errorMessage.innerText = "There is no student record matching with your input.";
-        // page.insertBefore(errorMessage,pagination);
-        studentList.appendChild(errorMessage)
-    } else{
+        studentList.appendChild(errorMessage);
+        pagination.innerHTML=pageInsertHTML(1);
+    } else {
         let node=studentList.querySelector('.error-message');
-        node.parentNode.removeChild(node);
+        if (node){
+            node.parentNode.removeChild(node);
+        }//end of if statement
         pagination.innerHTML=pageInsertHTML(Math.ceil(matchCount/recordsPerPage));
-    }
-
-    //reset pagination active tag
-    // assignActive(1);
-
-    //Now, if there are more than 10 records from search, pagination button it is not working well
-    // for example, if we search t, there is 15 records.
-
+    }//end of else statement
+    //assign active className to the pagination of research result page
+    assignActive(currentPage);
     //reset match count
     matchCount=0;
     searchInput.value='';
-
+    event.stopPropagation();
 });
 
