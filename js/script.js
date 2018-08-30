@@ -9,6 +9,8 @@ let recordsPerPage=10; //only 10 students record will be displayed for each page
 let allRecords =  document.querySelectorAll('.student-item.cf'); //select all student records
 let totalNumOfRecord = allRecords.length;
 let page = document.querySelector('.page');
+let studentList=document.querySelector('student-list');
+
 
 // Create a function to hide all of the items in the list excpet for the ten you want to show
 // Tip: Keep in mind that with a list of 54 studetns, the last page will only display four
@@ -27,29 +29,19 @@ let getNumOfPages =() =>{
 /**
  * Need to display the list of page numbers
  */
-let contentHTML =`<ul>`;
-let pageInsertHTML= () =>{
-    for (let i=0; i<getNumOfPages(); i++){
-        if (i+1 === currentPage){
-            contentHTML+=`<li><a href="#">${i+1}</a></li>`;
-        } else{
-            contentHTML+=`<li><a href="#">${i+1}</a></li>`;
-        }
+let pageInsertHTML= (pageNumber) =>{
+    let contentHTML =`<ul>`;
+    for (let i=0; i<pageNumber; i++){
+        contentHTML+=`<li><a href="#">${i+1}</a></li>`;
     }
     contentHTML+=`</ul>`;
+    return contentHTML;
 };
-pageInsertHTML();
 
 let pagination=document.createElement('div');
 pagination.className = 'pagination';
-pagination.innerHTML=contentHTML;
+pagination.innerHTML= pageInsertHTML(getNumOfPages());
 page.appendChild(pagination);
-
-
-// for (let i=0; i<getNumOfPages();i++){
-//     pagination.appendChild(createPageList());
-// }
-
 
 
 /**
@@ -80,16 +72,16 @@ let hideNextPages = (currentPage) =>{
 /**
  *
  */
-let showCurrentPage = (currentPage) =>{
-    for (let i=(currentPage-1)*recordsPerPage; i<currentPage*recordsPerPage;i++){
-        if (i>totalNumOfRecord){
-
-        } else{
-            allRecords[i].style.display='block';
-        }
-    }
-
-};
+// let showCurrentPage = (currentPage) =>{
+//     for (let i=(currentPage-1)*recordsPerPage; i<currentPage*recordsPerPage;i++){
+//         if (i>totalNumOfRecord){
+//
+//         } else{
+//             allRecords[i].style.display='block';
+//         }
+//     }
+//
+// };
 
 let resetRecords=() =>{
     for (let i=0;i<totalNumOfRecord;i++){
@@ -106,7 +98,7 @@ let hideAllRecords=() =>{
 /**
  * make class active
  */
-let assginActive =(activeNo)=>{
+let assignActive =(activeNo)=>{
     let activePage = document.querySelectorAll('.pagination ul li a');
     for (let i=0; i<activePage.length; i++){
         if (i+1 ===activeNo){
@@ -118,11 +110,9 @@ let assginActive =(activeNo)=>{
 
 };
 // call the functions to hide records based on the current page number
-// hidePreviousPages(currentPage);
-// hideNextPages(currentPage);
-hideAllRecords();
-showCurrentPage(currentPage);
-assginActive(currentPage);
+hidePreviousPages(currentPage);
+hideNextPages(currentPage);
+assignActive(currentPage);
 
 /**
  * printRecords function
@@ -150,6 +140,94 @@ selected.addEventListener('click', (event) => {
     // console.log(pageNo);
     // event.preventDefault();
     printRecords(pageNo);
-    assginActive(pageNo);
+    assignActive(pageNo);
+});
+
+// The following code are for the purpose of extra credits
+
+/** Extra Credit Part 1: Add search component
+ * Using JavaScript DOM to add HTML for student search div dynamically
+ */
+
+/**
+ * Create <div class='student-search'> </div>
+ * and append to page-header, create <input placeholder='Search for students...'><button></button>
+ * and put inside div with className 'student-search'
+ * the result is:
+ * <div class="page-header cf">
+ *     <h2>Students</h2>
+ *      <div class="student-search">
+ *     <input placeholder="Search for students...">
+ *         <button>Search</button>
+ *      </div>
+ * </div>
+ * @type {HTMLElement}
+ */
+let student_search = document.createElement('div');
+student_search.className='student-search';
+let page_header= document.querySelector('.page-header.cf');
+page_header.appendChild(student_search);
+
+let searchInput = document.createElement('input');
+searchInput.placeholder = 'Search for students...';
+student_search.appendChild(searchInput);
+let searchButton = document.createElement('button');
+searchButton.innerText='Search';
+student_search.appendChild(searchButton);
+
+/** Extra credit Part 2: Add functionality to the search component
+ * addEventListener to searchButton
+ */
+let matchCount=0;
+let searchName = (name) =>{
+    for (let i=0; i<totalNumOfRecord; i++){
+        let ifName=allRecords[i].querySelector('h3').innerText.includes(name);
+        let ifEmail=allRecords[i].querySelector('.email').innerText.includes(name);
+        if (ifName||ifEmail){
+            allRecords[i].style.display='block';
+            matchCount++;//extra credit part 3
+        }
+    }
+};
+// create a function select all elements with .display='block';
+// and then use hidePrevious, hideNext to make the new pagination works.
+
+// let searchResultPageNumber = ()=>{
+//     if (matchCount === 0){
+//         return 1;
+//     } else{
+//         return Math.ceil(matchCount/recordsPerPage);
+//     }
+// };
+
+searchButton.addEventListener('click',()=>{
+    // first, all records need to be hide
+    hideAllRecords();
+    // next, need to loop through
+    // h3 or span class=email from div student-details class
+    console.log('You just clicked the searchButton');
+    console.log(searchInput.value.toLowerCase());
+    searchName(searchInput.value.toLowerCase());
+    //update new pagination based on search results
+    // pagination.innerHTML=pageInsertHTML(searchResultPageNumber());
+    if (matchCount === 0){
+        pagination.innerHTML=pageInsertHTML(1);
+        let errorMessage=document.createElement('h3');
+        errorMessage.innerText = "There is no student record matching with your input.";
+        page.insertBefore(errorMessage,pagination);
+    } else{
+        pagination.innerHTML=pageInsertHTML(Math.ceil(matchCount/recordsPerPage));
+    }
+
+    //reset pagination active tag
+    // assignActive(1);
+
+    //Now, if there are more than 10 records from search, pagination button it is not working well
+    // for example, if we search t, there is 15 records.
+
+    //reset match count
+    matchCount=0;
+    searchInput.value='';
+
 });
 
