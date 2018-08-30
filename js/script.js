@@ -9,7 +9,7 @@ let recordsPerPage=10; //only 10 students record will be displayed for each page
 let allRecords =  document.querySelectorAll('.student-item.cf'); //select all student records
 let totalNumOfRecord = allRecords.length;
 let page = document.querySelector('.page');
-let studentList=document.querySelector('student-list');
+let studentList=document.querySelector('.student-list');
 
 
 // Create a function to hide all of the items in the list excpet for the ten you want to show
@@ -210,12 +210,16 @@ searchButton.addEventListener('click',()=>{
     searchName(searchInput.value.toLowerCase());
     //update new pagination based on search results
     // pagination.innerHTML=pageInsertHTML(searchResultPageNumber());
+    let errorMessage=document.createElement('h3');
     if (matchCount === 0){
         pagination.innerHTML=pageInsertHTML(1);
-        let errorMessage=document.createElement('h3');
+        errorMessage.className= 'error-message';
         errorMessage.innerText = "There is no student record matching with your input.";
-        page.insertBefore(errorMessage,pagination);
+        // page.insertBefore(errorMessage,pagination);
+        studentList.appendChild(errorMessage)
     } else{
+        let node=studentList.querySelector('.error-message');
+        node.parentNode.removeChild(node);
         pagination.innerHTML=pageInsertHTML(Math.ceil(matchCount/recordsPerPage));
     }
 
