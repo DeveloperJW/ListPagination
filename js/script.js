@@ -74,10 +74,10 @@ let resetRecords=(collection) =>{
         collection[i].style.display = 'block';
     }
 };
-//hideAllRecords will hide all the elements from the variable filterCollection
+//hideAllRecords will hide all the elements from the allRecords
 let hideAllRecords=() =>{
     for (let i=0;i<totalNumOfRecord;i++){
-        filterCollection[i].style.display = 'none';
+        allRecords[i].style.display = 'none';
     }
 };
 
@@ -122,7 +122,6 @@ let selected = document.querySelector('.pagination ul');
 selected.addEventListener('click', (event) => {
     if (event.target.tagName ==='A'){
         let pageNo=parseInt(event.target.textContent);
-        // printRecords(pageNo,filterCollection);
         assignActive(pageNo);
         currentPage=pageNo;
         printRecords();
@@ -214,6 +213,7 @@ searchButton.addEventListener('click',(event)=>{
         }
     });
     //reset match count
+    console.log(searchInput.value);
     matchCount=0;//need to reset this number for another search
     searchInput.value='';//reset the input text
     event.stopPropagation();
