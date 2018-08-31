@@ -10,8 +10,7 @@ let allRecords =  document.querySelectorAll('.student-item.cf'); //select all st
 let totalNumOfRecord = allRecords.length;
 let page = document.querySelector('.page');
 let studentList=document.querySelector('.student-list');
-let filterCollection = allRecords;
-
+let filterCollection = allRecords;// when search button is clicked, set this variable to corresponding records
 let errorMessage=document.createElement('h3');
 
 
@@ -31,6 +30,7 @@ let getNumOfPages =() =>{
 
 /**
  * Need to display the list of page numbers
+ * Note: each time the pageInertHTML function is called, the eventListener applied previously will not be carrier together
  */
 let pageInsertHTML= (pageNumber) =>{
     let contentHTML =`<ul>`;
@@ -68,16 +68,16 @@ let hideNextPages = (currentPage, collection) =>{
         collection[i].style.display='none';
     }
 };
-
+// resetRecord will take collection as parameter and display all the elements from the collection
 let resetRecords=(collection) =>{
     for (let i=0;i<collection.length;i++){
-        allRecords[i].style.display = 'block';
+        collection[i].style.display = 'block';
     }
 };
-
+//hideAllRecords will hide all the elements from the variable filterCollection
 let hideAllRecords=() =>{
     for (let i=0;i<totalNumOfRecord;i++){
-        allRecords[i].style.display = 'none';
+        filterCollection[i].style.display = 'none';
     }
 };
 
@@ -124,11 +124,8 @@ selected.addEventListener('click', (event) => {
         let pageNo=parseInt(event.target.textContent);
         // printRecords(pageNo,filterCollection);
         assignActive(pageNo);
-        console.log(filterCollection.length);
-        console.log(currentPage);
         currentPage=pageNo;
         printRecords();
-        console.log(currentPage);
     }
     event.stopPropagation();
 });
@@ -188,10 +185,7 @@ searchButton.addEventListener('click',(event)=>{
     hideAllRecords();
     // next, need to loop through
     // h3 or span class=email from div student-details class
-    console.log('You just clicked the searchButton');
-    console.log(searchInput.value.toLowerCase());
     searchName(searchInput.value.toLowerCase());
-    console.log("The page number is "+filterCollection.length);
 
     if (matchCount === 0){
         errorMessage.className= 'error-message';
@@ -208,11 +202,20 @@ searchButton.addEventListener('click',(event)=>{
     //assign active className to the pagination of research result page
     assignActive(currentPage);
     // filter and only show first 10 records in search results
-    hidePreviousPages(currentPage,filterCollection);
-    hideNextPages(currentPage,filterCollection);
+    hidePreviousPages(1,filterCollection);
+    hideNextPages(1,filterCollection);
+    let newSelected=document.querySelector('.pagination ul');
+    newSelected.addEventListener('click',(event)=>{
+        if (event.target.tagName ==='A') {
+            let newPageNo = parseInt(event.target.textContent);
+            assignActive(newPageNo);
+            currentPage=newPageNo;
+            printRecords();
+        }
+    });
     //reset match count
-    matchCount=0;
-    searchInput.value='';
+    matchCount=0;//need to reset this number for another search
+    searchInput.value='';//reset the input text
     event.stopPropagation();
 });
 
